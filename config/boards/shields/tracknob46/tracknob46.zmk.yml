@@ -1,0 +1,13 @@
+file_format: "1"
+id: tracknob46
+name: tracknob46
+type: shield
+url: https://github.com/ShiniNet/zmk-config01/
+requires: [pro_micro]
+exposes: [i2c_oled]
+features:
+  - keys
+  - display
+siblings:
+  - tracknob46_left
+  - tracknob46_right

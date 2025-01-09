@@ -19,7 +19,8 @@
 #
 ---
 include:
-  - board: nice_nano_v2
-    shield: corne_left
-  - board: nice_nano_v2
-    shield: corne_right
+    - board: nice_nano_v2
+      shield: tracknob46_left
+    - board: nice_nano_v2
+      shield: tracknob46_right
+#     snippet: zmk-usb-logging

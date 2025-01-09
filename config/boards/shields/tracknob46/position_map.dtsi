@@ -1,0 +1,9 @@
+
+
+/ {
+    layout_tracknob46_position_map: layout_tracknob46_position_map {
+        compatible = "zmk,physical-layout-position-map";
+
+        complete;
+    };
+};
