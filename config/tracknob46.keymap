@@ -9,19 +9,62 @@
 #include <dt-bindings/zmk/keys.h>
 #include <dt-bindings/zmk/pointing.h>
 #include <dt-bindings/zmk/pointing.h>
+#include <input/processors.dtsi>
 
 #define L_DEFAULT  0
 #define L_NUMPAD   1
 #define L_MOUSE    2
-#define L_LEFTPAD  3
+#define L_MOUSE_SCROLL  3
 #define L_SYSTEM   4
-#define L_LAYERCTL 5
 
 // Mouse Scroll Value
 
 #define ZMK_POINTING_DEFAULT_SCRL_VAL 100
 
+
+&pro_micro_i2c {
+    status = "okay";
+
+    glidepoint: glidepoint@2a {
+        compatible = "cirque,pinnacle";
+        reg = <0x2a>;
+        status = "okay";
+        dr-gpios = <&pro_micro 1 (GPIO_ACTIVE_HIGH)>;
+
+        sensitivity = "4x";
+        //sleep; 
+        no-taps;
+    };
+};
+
 / {
+    input_processors {
+        zip_scroll_scaler: zip_scroll_scaler {
+            compatible = "zmk,input-processor-scaler";
+            #input-processor-cells = <2>;
+            type = <INPUT_EV_REL>;
+            codes = <INPUT_REL_WHEEL INPUT_REL_HWHEEL>;
+            track-remainders;
+        };
+    };
+
+    // TrackPad Layer CTL
+    glidepoint_input_listener: glidepoint_input {
+        compatible = "zmk,input-listener";
+        device = <&glidepoint>;
+
+        input-processors = <&zip_xy_transform (INPUT_TRANSFORM_XY_SWAP | INPUT_TRANSFORM_X_INVERT | INPUT_TRANSFORM_Y_INVERT)>, <&zip_xy_scaler 3 2>, <&zip_temp_layer L_MOUSE 500>;
+        
+        lowspeedmode {
+            layers = <L_NUMPAD>;
+            input-processors = <&zip_xy_transform (INPUT_TRANSFORM_XY_SWAP | INPUT_TRANSFORM_X_INVERT | INPUT_TRANSFORM_Y_INVERT)>, <&zip_xy_scaler 3 4>, <&zip_temp_layer L_MOUSE 500>;
+        };
+        scroller {
+            layers = <L_MOUSE_SCROLL>;
+            input-processors = <&zip_xy_to_scroll_mapper>,<&zip_scroll_transform (INPUT_TRANSFORM_XY_SWAP | INPUT_TRANSFORM_Y_INVERT)>,<&zip_scroll_scaler 1 6>;
+        };
+    };
+
     behaviors {
         // Mouse Scroll
 
@@ -89,7 +132,7 @@
             display-name = "sub_layer";
             sensor-bindings = <&scroll_up_down>;
             bindings = <
-&kp TILDE  &mt2 F1 NUMBER_1  &mt2 F2 NUMBER_2  &mt2 F3 NUMBER_3  &mt2 F4 NUMBER_4  &mt2 F5 NUMBER_5  &kp PAGE_UP  &kp PRINTSCREEN  &kp SLASH  &kp KP_NUMBER_7  &kp KP_NUMBER_8  &kp KP_NUMBER_9  &trans  &mt2 F6 NUMBER_6  &mt2 F7 NUMBER_7  &mt2 F8 NUMBER_8  &mt2 F9 NUMBER_9  &mt2 F10 NUMBER_0  &kp HOME  &kp END  &kp ASTERISK  &kp KP_NUMBER_4  &kp KP_NUMBER_5  &kp KP_NUMBER_6  &trans  &mt2 F11 SEMICOLON  &mt2 F12 EQUAL  &kp SINGLE_QUOTE  &kp DOUBLE_QUOTES  &trans  &kp PAGE_DOWN  &kp DEL  &none  &kp KP_NUMBER_1  &kp KP_NUMBER_2  &kp KP_NUMBER_3  &trans  &trans  &to 0  &trans  &trans  &trans  &trans  &kp KP_NUMBER_0  &dot_comma  &pls_minus  &trans  &trans  &to 4  &trans  &trans
+&kp TILDE  &mt2 F1 NUMBER_1  &mt2 F2 NUMBER_2  &mt2 F3 NUMBER_3  &mt2 F4 NUMBER_4  &mt2 F5 NUMBER_5  &kp PAGE_UP  &kp PRINTSCREEN  &kp SLASH  &kp KP_NUMBER_7  &kp KP_NUMBER_8  &kp KP_NUMBER_9  &trans  &mt2 F6 NUMBER_6  &mt2 F7 NUMBER_7  &mt2 F8 NUMBER_8  &mt2 F9 NUMBER_9  &mt2 F10 NUMBER_0  &kp HOME  &kp END  &kp ASTERISK  &kp KP_NUMBER_4  &kp KP_NUMBER_5  &kp KP_NUMBER_6  &trans  &mt2 F11 SEMICOLON  &mt2 F12 EQUAL  &kp SINGLE_QUOTE  &kp DOUBLE_QUOTES  &trans  &kp PAGE_DOWN  &kp DEL  &none  &kp KP_NUMBER_1  &kp KP_NUMBER_2  &kp KP_NUMBER_3  &trans  &trans  &trans  &trans  &trans  &trans  &trans  &kp KP_NUMBER_0  &dot_comma  &pls_minus  &trans  &trans  &to 4  &trans  &trans
             >;
         };
 
@@ -113,7 +156,7 @@
             display-name = "system_layer";
             sensor-bindings = <&scroll_up_down>;
             bindings = <
-&sys_reset  &bootloader  &none  &none  &none  &none  &none  &none  &none  &none  &bootloader  &sys_reset  &studio_unlock  &none  &none  &none  &none  &none  &none  &none  &none  &none  &none  &none  &bt BT_CLR_ALL  &none  &none  &none  &none  &none  &none  &none  &none  &none  &none  &bt BT_CLR_ALL  &none  &none  &none  &none  &to 0  &none  &none  &none  &none  &none  &none  &none  &none  &none  &none
+&sys_reset  &bootloader  &none  &none  &none  &none  &none  &none  &none  &none  &bootloader  &sys_reset  &studio_unlock  &none  &none  &none  &none  &none  &none  &none  &none  &none  &none  &none  &bt BT_CLR_ALL  &bt BT_NXT  &bt BT_PRV  &none  &none  &none  &none  &none  &none  &bt BT_PRV  &bt BT_NXT  &bt BT_CLR_ALL  &none  &none  &none  &none  &to 0  &none  &none  &none  &none  &none  &none  &none  &none  &none  &none
             >;
         };
     };
