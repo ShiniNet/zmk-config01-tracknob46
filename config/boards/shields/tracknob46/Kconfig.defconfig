@@ -17,9 +17,3 @@ config ZMK_SPLIT
     default y
 
 endif
-
-config I2C
-    default y
-    
-config SSD1306
-    default y

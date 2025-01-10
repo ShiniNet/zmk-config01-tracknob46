@@ -21,24 +21,16 @@
         ;
 };
 
-&pro_micro_i2c {
+&glidepoint  {
     status = "okay";
-
-    glidepoint: glidepoint@2a {
-        compatible = "cirque,pinnacle";
-        reg = <0x2a>;
-        status = "okay";
-        dr-gpios = <&pro_micro 1 (GPIO_ACTIVE_HIGH)>;
-
-        sensitivity = "4x";
-        //sleep; 
-        no-taps;
-    };
 };
 
-/ {
-    glidepoint_input_listener: glidepoint_input {
-        compatible = "zmk,input-listener";
-        device = <&glidepoint>;
-    };
+&glidepoint_listener {// If you want the left side to be central, comment it out.
+    status = "okay";
 };
+
+/* If you want the left side to be central, uncomment it.
+&glidepoint_split {
+    device = <&glidepoint>;
+};
+*/

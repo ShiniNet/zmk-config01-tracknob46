@@ -14,31 +14,29 @@
 #define L_DEFAULT  0
 #define L_NUMPAD   1
 #define L_MOUSE    2
-#define L_MOUSE_SCROLL  3
+#define L_SCROLL   3
 #define L_SYSTEM   4
 
 // Mouse Scroll Value
-
 #define ZMK_POINTING_DEFAULT_SCRL_VAL 100
 
-
-&pro_micro_i2c {
-    status = "okay";
-
-    glidepoint: glidepoint@2a {
-        compatible = "cirque,pinnacle";
-        reg = <0x2a>;
-        status = "okay";
-        dr-gpios = <&pro_micro 1 (GPIO_ACTIVE_HIGH)>;
-
-        sensitivity = "4x";
-        //sleep; 
-        no-taps;
-    };
+// cirque trackpad input&layer control
+&glidepoint_listener {
+        input-processors = <&zip_xy_transform (INPUT_TRANSFORM_XY_SWAP | INPUT_TRANSFORM_X_INVERT | INPUT_TRANSFORM_Y_INVERT)>, <&zip_xy_scaler 3 2>, <&zip_temp_layer L_MOUSE 700>;
+    
+        lowspeedmode {
+            layers = <L_NUMPAD>;
+            input-processors = <&zip_xy_transform (INPUT_TRANSFORM_XY_SWAP | INPUT_TRANSFORM_X_INVERT | INPUT_TRANSFORM_Y_INVERT)>, <&zip_xy_scaler 3 4>, <&zip_temp_layer L_MOUSE 700>;
+        };
+        scroller {
+            layers = <L_SCROLL>;
+            input-processors = <&zip_xy_to_scroll_mapper>,<&zip_scroll_transform (INPUT_TRANSFORM_XY_SWAP | INPUT_TRANSFORM_Y_INVERT)>,<&zip_scroll_scaler 1 6>;
+        };
 };
 
 / {
     input_processors {
+        // add scroll scaler
         zip_scroll_scaler: zip_scroll_scaler {
             compatible = "zmk,input-processor-scaler";
             #input-processor-cells = <2>;
@@ -48,26 +46,8 @@
         };
     };
 
-    // TrackPad Layer CTL
-    glidepoint_input_listener: glidepoint_input {
-        compatible = "zmk,input-listener";
-        device = <&glidepoint>;
-
-        input-processors = <&zip_xy_transform (INPUT_TRANSFORM_XY_SWAP | INPUT_TRANSFORM_X_INVERT | INPUT_TRANSFORM_Y_INVERT)>, <&zip_xy_scaler 3 2>, <&zip_temp_layer L_MOUSE 500>;
-        
-        lowspeedmode {
-            layers = <L_NUMPAD>;
-            input-processors = <&zip_xy_transform (INPUT_TRANSFORM_XY_SWAP | INPUT_TRANSFORM_X_INVERT | INPUT_TRANSFORM_Y_INVERT)>, <&zip_xy_scaler 3 4>, <&zip_temp_layer L_MOUSE 500>;
-        };
-        scroller {
-            layers = <L_MOUSE_SCROLL>;
-            input-processors = <&zip_xy_to_scroll_mapper>,<&zip_scroll_transform (INPUT_TRANSFORM_XY_SWAP | INPUT_TRANSFORM_Y_INVERT)>,<&zip_scroll_scaler 1 6>;
-        };
-    };
-
     behaviors {
-        // Mouse Scroll
-
+        // Encoder to Mouse Scroll
         scroll_up_down: behavior_sensor_rotate_mouse_wheel_up_down {
             compatible = "zmk,behavior-sensor-rotate";
             #sensor-binding-cells = <0>;
